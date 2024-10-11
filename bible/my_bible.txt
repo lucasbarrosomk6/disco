@@ -1,0 +1,141 @@
+# My Bible
+
+This document serves as a comprehensive guide to the client's preferences, coding standards, and project-specific details. It is the ultimate reference for the user's exact specifications and desires, much like an attentive assistant's notebook from "The Devil Wears Prada." This bible will be continuously updated to reflect the user's instructions and ensure unwavering consistency in all project-related tasks, adhering to the client's vision for the project.
+
+## Meta Rules
+- ALWAYS look for and refer to this bible (my_bible.txt) when working on the project
+- ALWAYS update rules based on new evidence
+- Regularly review and refine processes and standards
+- Encourage team members to suggest improvements
+- Implement a feedback loop for continuous learning and adaptation
+
+## User Object Access
+- Always use the useUser() hook in client components
+- In server components, use getUser() function directly
+- Avoid passing user data as props between components when possible
+
+## Endpoint Setup
+- Use Next.js API routes for backend functionality
+- Implement proper error handling and status codes
+- Ensure all endpoints are properly authenticated
+- Use zod for input validation
+
+## CSS Preferences
+- Utilize Tailwind CSS for styling
+- Prefer utility classes over custom CSS
+- Use shadcn/ui components when available
+- Maintain a consistent color scheme throughout the app
+
+## Frequently Referenced Constants
+- APP_NAME: "Disco.ai"
+- DEFAULT_CURRENCY: "CAD"
+- FREE_TRIAL_DAYS: 14
+- SUBSCRIPTION_PLANS: ["Free Trial", "Basic", "Pro", "Premium"]
+
+## Code Formatting and Style
+- Follow a modular approach, separating concerns
+- Use meaningful variable and function names
+- Implement proper TypeScript typing
+
+## File Structure and Organization
+- Use feature-based folder structure
+- Keep components, hooks, and utilities in separate directories
+- Use index.ts files for cleaner imports
+
+## Testing Requirements
+- Write unit tests for critical functions
+- Implement integration tests for key user flows
+- Aim for high test coverage, especially in core functionality
+
+## Deployment Process
+- Use CI/CD pipeline for automated deployments
+- Implement staging and production environments
+- Perform pre-deployment checks and tests
+
+## Communication Preferences
+- Be direct, concise and like a bro that is helping create something really cool
+- Use emojis
+- Always look to improve and update the bible
+- Always try to learn how to help better and commit it to this file
+- Follow programming rules rigidly
+
+## Project-Specific Guidelines
+- Follow Agile methodology
+- Use JIRA for task tracking
+- Conduct weekly sprint planning and retrospectives
+
+## Naming Conventions
+- Use camelCase for variables and functions
+- Use PascalCase for components and classes
+- Use UPPER_CASE for constants
+
+## Error Handling
+- Implement try-catch blocks in async functions
+- Use custom error classes for specific error types
+- Provide meaningful error messages to the user
+
+## Performance Optimization
+- Optimize images and assets
+- Implement lazy loading for non-critical components
+- Use server-side rendering where appropriate
+
+## Third-Party Integrations
+- Thoroughly vet third-party libraries before integration
+- Keep third-party dependencies up-to-date
+- Document all third-party integrations
+
+## Documentation Standards
+- Use `my_manual_documentation_notes.md` as a database of documented files
+- Each documented file should have a single, unique entry
+- Do not duplicate entries for the same file
+- Update existing entries instead of creating new ones for already documented files
+- Maintain a clear and consistent format for each entry
+- Include relevant metadata for each documented file
+- Keep the total count of documented files accurate and up-to-date
+
+## Version Control Practices
+- Use Git for version control
+- Follow Git Flow branching strategy
+- Write meaningful commit messages
+
+## Accessibility Requirements
+- Ensure proper ARIA attributes are used
+- Maintain keyboard navigation support
+- Use semantic HTML elements
+
+## Localization and Internationalization
+- Use i18n for text translations
+- Support right-to-left languages
+- Use locale-specific formatting for dates and numbers
+
+## Security Measures
+- Implement HTTPS for all communications
+- Use parameterized queries to prevent SQL injection
+- Regularly update dependencies to patch security vulnerabilities
+
+## Code Review Process
+- All code changes must go through pull requests
+- Require at least one approval before merging
+- Use automated code quality checks
+
+## Favorite Tools and Libraries
+- Next.js for the framework
+- Tailwind CSS for styling
+- shadcn/ui for UI components
+- Drizzle ORM for database operations
+
+## State Management
+- Use React Context for global state when necessary
+- Prefer local state for component-specific data
+- Implement proper loading states for async operations
+
+## Database Queries
+- Use Drizzle ORM for database operations
+- Implement efficient queries to minimize database load
+- Always consider pagination for list queries
+
+## Continuous Improvement
+- ALWAYS update rules based on new evidence
+- Regularly review and refine processes and standards
+- Encourage team members to suggest improvements
+- Implement a feedback loop for continuous learning and adaptation

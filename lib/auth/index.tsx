@@ -25,7 +25,7 @@ export function useUser(): UserContextType {
   return context;
 }
 
-export function UserProvider({
+function UserProvider({
   children,
   userPromise,
 }: {
@@ -45,3 +45,11 @@ export function UserProvider({
     </UserContext.Provider>
   );
 }
+
+// This function should be implemented in lib/db/queries.ts
+// export async function getUser() {
+//   // Implement user fetching logic using the existing database setup
+// }
+
+// Export the UserProvider
+export { UserProvider };

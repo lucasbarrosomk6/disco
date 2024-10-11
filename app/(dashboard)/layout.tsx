@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CircleIcon, Home, LogOut } from 'lucide-react';
+import { Home, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +12,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser } from '@/lib/auth';
+
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
+import Icon from '@/app/icon.svg';
+import { useUser } from '@/lib/auth';
+
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,8 +34,14 @@ function Header() {
     <header className="border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
-          <CircleIcon className="h-6 w-6 text-orange-500" />
-          <span className="ml-2 text-xl font-semibold text-gray-900">ACME</span>
+          <Image
+            src={Icon}
+            alt="disco.ai logo"
+            width={24}
+            height={24}
+            className="h-6 w-6"
+          />
+          <span className="ml-2 text-xl font-semibold text-gray-900">disco.ai</span>
         </Link>
         <div className="flex items-center space-x-4">
           <Link
@@ -47,7 +57,7 @@ function Header() {
                   <AvatarImage alt={user.name || ''} />
                   <AvatarFallback>
                     {user.email
-                      .split(' ')
+                      .split('@')
                       .map((n) => n[0])
                       .join('')}
                   </AvatarFallback>
@@ -73,9 +83,9 @@ function Header() {
           ) : (
             <Button
               asChild
-              className="bg-black hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-full"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-full"
             >
-              <Link href="/sign-up">Sign Up</Link>
+              <Link href="/sign-in">Sign In</Link>
             </Button>
           )}
         </div>

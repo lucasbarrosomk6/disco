@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  jsonb
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -140,3 +141,19 @@ export enum ActivityType {
   INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER',
   ACCEPT_INVITATION = 'ACCEPT_INVITATION',
 }
+
+export const products = pgTable('products', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  productName: varchar('product_name', { length: 255 }).notNull(),
+  tagline: text('tagline'),
+  targetAudience: text('target_audience'),
+  mainUseCase: text('main_use_case'),
+  keyFeatures: jsonb('key_features').notNull().default([]),  // Change this line
+  problemsSolved: text('problems_solved'),
+  differentiators: text('differentiators'),
+  successMetrics: text('success_metrics'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+

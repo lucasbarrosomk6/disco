@@ -3,6 +3,7 @@ import { db } from './drizzle';
 import { activityLogs, teamMembers, teams, users } from './schema';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth/session';
+import { PlanInfo } from '@/lib/plan';
 
 export async function getUser() {
   const sessionCookie = cookies().get('session');
@@ -126,4 +127,70 @@ export async function getTeamForUser(userId: number) {
   });
 
   return result?.teamMembers[0]?.team || null;
+}
+
+export async function getUserPlan(userId: number): Promise<PlanInfo | null> {
+  const userWithTeam = await getUserWithTeam(userId);
+  if (!userWithTeam || !userWithTeam.teamId) {
+    return null;
+  }
+
+  // Fetch the full team information
+  const team = await db.query.teams.findFirst({
+    where: eq(teams.id, userWithTeam.teamId),
+  });
+
+  if (!team || !team.planName) {
+    return null;
+  }
+
+  const planName = team.planName;
+
+  // Define plan details based on the plan name
+  const planDetails: Record<string, PlanInfo> = {
+    'Free Trial': {
+      name: 'Free Trial',
+      price: 0,
+      interval: '14 days',
+      features: [
+        'Up to 5 comprehensive company reports',
+        'Full access to all basic features',
+        'No credit card required',
+      ],
+    },
+    'Basic': {
+      name: 'Basic',
+      price: 29,
+      interval: 'month',
+      features: [
+        'Up to 10 reports per month',
+        'Instant company reports',
+        'Personalized value propositions',
+      ],
+    },
+    'Pro': {
+      name: 'Pro',
+      price: 99,
+      interval: 'month',
+      features: [
+        'Up to 50 reports per month',
+        'All features in Basic Plan',
+        'Advanced insights',
+        'Priority email support',
+      ],
+    },
+    'Premium': {
+      name: 'Premium',
+      price: 199,
+      interval: 'month',
+      features: [
+        'Unlimited reports',
+        'All features in Pro Plan',
+        'Early access to new features',
+        'Dedicated customer success manager',
+      ],
+    },
+  };
+
+  return planDetails[planName as keyof typeof planDetails] || null;
 }
