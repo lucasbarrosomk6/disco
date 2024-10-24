@@ -58,6 +58,7 @@ This document serves as a comprehensive guide to the client's preferences, codin
 - Always look to improve and update the bible
 - Always try to learn how to help better and commit it to this file
 - Follow programming rules rigidly
+- Update relevant job notes in the manual upon completion of each task
 
 ## Project-Specific Guidelines
 - Follow Agile methodology
@@ -139,3 +140,4 @@ This document serves as a comprehensive guide to the client's preferences, codin
 - Regularly review and refine processes and standards
 - Encourage team members to suggest improvements
 - Implement a feedback loop for continuous learning and adaptation
+- Update relevant job notes in the manual after completing each task

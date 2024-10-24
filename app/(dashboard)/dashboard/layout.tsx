@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -36,7 +36,6 @@ export default function DashboardLayout({
         </div>
         <Button
           className="text-white"
-          variant="ghost"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           <Menu className="h-6 w-6" />

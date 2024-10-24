@@ -18,6 +18,7 @@ export async function createCheckoutSession({
   team: Team | null;
   priceId: string;
 }) {
+  console.log("createCheckoutSession")
   const user = await getUser();
 
   if (!team || !user) {

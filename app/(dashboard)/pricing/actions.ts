@@ -13,6 +13,7 @@ const updateSubscriptionSchema = z.object({
 });
 
 export async function updateTeamSubscription(prevState: any, formData: FormData) {
+  console.log("updateTeamSubscription")
   const user = await getUser();
   
   if (!user) {

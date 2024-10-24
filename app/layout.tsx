@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
-import { UserProvider } from '@/lib/auth/index';  // Update this line
+import { UserProvider } from '@/lib/auth';
 import { PlanProvider } from '@/lib/plan';
 import { getUser, getUserPlan } from '@/lib/db/queries';
 import Icon from './icon.svg';
@@ -21,13 +21,12 @@ export const viewport: Viewport = {
 
 const manrope = Manrope({ subsets: ['latin'] });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let userPromise = getUser();
-  let planPromise = userPromise.then(user => user ? getUserPlan(user.id) : null);
+  const initialUser = await getUser();
 
   return (
     <html
@@ -35,8 +34,8 @@ export default function RootLayout({
       className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
     >
       <body className="min-h-[100dvh] bg-gray-50">
-        <UserProvider userPromise={userPromise}>
-          <PlanProvider planPromise={planPromise}>
+        <UserProvider userPromise={Promise.resolve(initialUser)}>
+          <PlanProvider planPromise={getUserPlan(initialUser?.id ?? 0)}>
             {children}
           </PlanProvider>
         </UserProvider>

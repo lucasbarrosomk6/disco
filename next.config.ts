@@ -1,9 +1,23 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack: (config: { resolve: { fallback: any; }; }, { isServer }: any) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        net: false,
+        tls: false,
+        fs: false,
+        crypto: false,
+        os: false,
+        perf_hooks: false,
+        stream: false,
+      };
+    }
+    return config;
+  },
   experimental: {
-    ppr: true,
+    serverComponentsExternalPackages: ['postgres'],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

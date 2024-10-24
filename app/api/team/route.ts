@@ -5,6 +5,7 @@ import { getUser } from '@/lib/db/queries';
 import { eq } from 'drizzle-orm';
 
 export async function GET(request: Request) {
+  console.log("team")
   try {
     const user = await getUser();
     if (!user) {

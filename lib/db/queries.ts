@@ -12,15 +12,18 @@ export async function getUser() {
   }
 
   const sessionData = await verifyToken(sessionCookie.value);
+ 
   if (
     !sessionData ||
     !sessionData.user ||
     typeof sessionData.user.id !== 'number'
   ) {
+    console.log('No session data or user ID is not a number');
     return null;
   }
 
   if (new Date(sessionData.expires) < new Date()) {
+    console.log('Session expired');
     return null;
   }
 
@@ -29,7 +32,6 @@ export async function getUser() {
     .from(users)
     .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
     .limit(1);
-
   if (user.length === 0) {
     return null;
   }
@@ -80,6 +82,7 @@ export async function getUserWithTeam(userId: number) {
 }
 
 export async function getActivityLogs() {
+  console.log("getActivityLogs")
   const user = await getUser();
   if (!user) {
     throw new Error('User not authenticated');

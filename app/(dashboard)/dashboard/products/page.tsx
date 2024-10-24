@@ -1,100 +1,56 @@
-'use client';
+import { Suspense } from 'react';
+import { getUser } from '@/lib/db/queries';
+import { redirect } from 'next/navigation';
+import DashboardHeader from '@/components/dashboard/dashboard-header';
+import DashboardShell from '@/components/dashboard/dashboard-shell';
+import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton';
+import {ProductList} from '@/components/dashboard/product-list';
+import { User } from '@/lib/db/schema';
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
-import { Loading } from '@/components/ui/loading';
+async function getProducts() {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return [];
+    }
+    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/dashboard/products?userId=${user.id}`, { 
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-interface Product {
-  id: number;
-  productName: string;
-  tagline: string;
-  createdAt: string;
-  keyFeatures: string | string[];
+    if (!res.ok) {
+      throw new Error('Failed to fetch products');
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
 }
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function ProductsPage() {
+  
 
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setProducts(data);
-      } catch (e) {
-        console.error('Error fetching products:', e);
-        setError('Failed to load products. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProducts();
-  }, []);
 
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  const products = await getProducts();
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-blue-600">Your Products</h1>
-        <Link href="/dashboard/products/add">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Product
-          </Button>
-        </Link>
-      </div>
-      <div className="space-y-4">
-        {products.map((product) => (
-          <Card key={product.id} className="w-full border border-gray-200">
-            <CardHeader>
-              <CardTitle className="text-blue-600">{product.productName}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500 mb-2">{product.tagline}</p>
-              <p className="text-xs text-gray-400 mb-2">
-                Created: {new Date(product.createdAt).toLocaleDateString()}
-              </p>
-              <div className="mb-4">
-                <strong className="text-gray-600">Key Features:</strong>
-                <ul className="list-disc list-inside text-gray-600">
-                  {Array.isArray(product.keyFeatures) 
-                    ? product.keyFeatures.slice(0, 3).map((feature, index) => (
-                        <li key={index} className="text-sm">{feature}</li>
-                      ))
-                    : <li className="text-sm">{product.keyFeatures}</li>
-                  }
-                </ul>
-                {Array.isArray(product.keyFeatures) && product.keyFeatures.length > 3 && (
-                  <p className="text-sm text-gray-500 mt-1">and {product.keyFeatures.length - 3} more...</p>
-                )}
-              </div>
-              <div className="flex space-x-2">
-                <Link href={`/dashboard/products/${product.id}`}>
-                  <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">View Details</Button>
-                </Link>
-                <Link href={`/dashboard/products/${product.id}/edit`}>
-                  <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">Edit</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+    <DashboardShell>
+      <DashboardHeader
+        heading="Products"
+        text="Manage your products here."
+      />
+      <Suspense fallback={<DashboardSkeleton />}>
+        {products.length > 0 ? (
+          <ProductList products={products} />
+        ) : (
+          <p>No products found. Create your first product to get started!</p>
+        )}
+      </Suspense>
+    </DashboardShell>
   );
 }
