@@ -36,6 +36,7 @@ function UserProvider({
   let [user, setUser] = useState<User | null>(initialUser);
 
   useEffect(() => {
+
     setUser(initialUser);
   }, [initialUser]);
 

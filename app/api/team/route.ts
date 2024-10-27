@@ -5,7 +5,6 @@ import { getUser } from '@/lib/db/queries';
 import { eq } from 'drizzle-orm';
 
 export async function GET(request: Request) {
-  console.log("team")
   try {
     const user = await getUser();
     if (!user) {
@@ -26,11 +25,14 @@ export async function GET(request: Request) {
       email: users.email,
       role: teamMembers.role,
     })
-    .from(teamMembers)
-    .innerJoin(users, eq(teamMembers.userId, users.id))
-    .where(eq(teamMembers.teamId, teamMember.teamId));
+      .from(teamMembers)
+      .innerJoin(users, eq(teamMembers.userId, users.id))
+      .where(eq(teamMembers.teamId, teamMember.teamId));
 
-    return NextResponse.json(teamMembersData);
+    const response = NextResponse.json(teamMembersData);
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
+
+    return response;
   } catch (error) {
     console.error('Error fetching team members:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

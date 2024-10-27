@@ -5,9 +5,7 @@ import { getUser } from '@/lib/db/queries';
 import { eq, desc } from 'drizzle-orm';
 
 export async function POST(request: Request) {
-    console.log("products POST")
   const user = await getUser();
-  console.log("user", user)
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -17,7 +15,7 @@ export async function POST(request: Request) {
 
   try {
     const [product] = await db.insert(products).values({
-      userId: Number(user.id),  // Convert string to number
+      userId: Number(user.id),
       productName,
       tagline,
       targetAudience,
@@ -47,22 +45,15 @@ export async function GET(req: NextRequest) {
       .where(eq(products.userId, userId))
       .orderBy(desc(products.createdAt));
 
-    const formattedProducts = allProducts.map(product => {
-      let parsedKeyFeatures;
-      try {
-        parsedKeyFeatures = JSON.parse(product.keyFeatures as string);
-      } catch (parseError) {
-        console.error('Error parsing keyFeatures:', parseError);
-        parsedKeyFeatures = []; // Default to an empty array or handle as needed
-      }
+    const formattedProducts = allProducts.map(product => ({
+      ...product,
+      keyFeatures: product.keyFeatures,
+    }));
 
-      return {
-        ...product,
-        keyFeatures: parsedKeyFeatures,
-      };
-    });
+    const response = NextResponse.json(formattedProducts);
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
 
-    return NextResponse.json(formattedProducts);
+    return response;
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });

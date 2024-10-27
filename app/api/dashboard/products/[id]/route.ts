@@ -1,37 +1,34 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
-import { products, users } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { products } from '@/lib/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { getUser } from '@/lib/db/queries';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    console.log("products id")
     const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const userId = user.id;
-    if (isNaN(userId)) {
-      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
-    }
 
     const productId = parseInt(params.id);
-    console.log("productId", productId)
     if (isNaN(productId)) {
       return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
     }
-    //401 if user is not the owner of the product
+
     const [product] = await db.select().from(products).where(eq(products.id, productId));
     if (product.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
- if (!product) {
+
+    if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
-    
 
-    return NextResponse.json(product);
+    const response = NextResponse.json(product);
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
+
+    return response;
   } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
@@ -118,7 +115,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     // Fetch the user's team ID
 
 
-   
+
 
     const productId = parseInt(params.id);
     if (isNaN(productId)) {

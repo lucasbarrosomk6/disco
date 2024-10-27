@@ -1,32 +1,23 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Search, Target, Zap, BarChart } from 'lucide-react';
+import { ArrowRight, Search, Target, Zap, BarChart, Upload, SearchCheckIcon, SearchIcon, BarChart2 } from 'lucide-react';
 import { Terminal } from './(dashboard)/terminal';
 import Image from 'next/image';
 import Icon from '@/app/icon.svg';
+import HeroAnimation from '@/components/ui/hero-animation';
 
 export default function HomePage() {
   return (
     <main>
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-            <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start mb-4">
-                <Image
-                  src={Icon}
-                  alt="disco.ai logo"
-                  width={48}
-                  height={48}
-                  className="h-12 w-12"
-                />
-                <span className="ml-2 text-2xl font-semibold text-gray-900">disco.ai</span>
-              </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 my-3">
+          <div className="flex flex-col lg:flex-row lg:flex-row lg:gap-8">
+            <div className="text-center md:max-w-2xl sm:mx-auto lg:text-left">
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-                Accelerate Your Sales
-                <span className="block text-blue-600">with AI-Driven Company Insights</span>
+                What if you used AI
+                <span className="block text-blue-600">to research your prospects?</span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Get instant, actionable reports on any company. Empower your sales strategy with tailored value propositions.
+                Get instant, actionable reports on any company. Tailored to your product's use case.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                 <a href="/sign-up">
@@ -37,8 +28,8 @@ export default function HomePage() {
                 </a>
               </div>
             </div>
-            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-              <Terminal />
+            <div className="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0  lg:mx-0 lg:col-span-3 lg:flex lg:items-center">
+              <HeroAnimation />
             </div>
           </div>
         </div>
@@ -49,42 +40,42 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-3 lg:gap-8">
             <div>
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
-                <Search className="h-6 w-6" />
+                <Upload className="h-6 w-6" />
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Instant Company Reports
+                  We know your product
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Generate detailed reports that highlight a company's key initiatives, challenges, and opportunities.
+                  You've spent enough time writing product docs. Let AI do the heavy lifting and identify your Target Audience, Use Cases, Key Features, and more.
                 </p>
               </div>
             </div>
 
             <div className="mt-10 lg:mt-0">
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
-                <Target className="h-6 w-6" />
+                <SearchIcon className="h-6 w-6" />
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Personalized Value Propositions
+                  We know your customers
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Input your product details, and our AI aligns your offerings with the prospect's specific needs.
+                  Disco AI will search for the information you need know to based on the problems you solve.
                 </p>
               </div>
             </div>
 
             <div className="mt-10 lg:mt-0">
               <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white">
-                <BarChart className="h-6 w-6" />
+                <BarChart2 className="h-6 w-6" />
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Data Retention for Enhanced Matching
+                  So you
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Every report contributes to a growing database, improving future recommendations and insights.
+                  Enter sales calls with a clear understanding of the company's needs. And how your product can help.
                 </p>
               </div>
             </div>

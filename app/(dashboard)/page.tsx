@@ -11,16 +11,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start mb-4">
-                <Image
-                  src={Icon}
-                  alt="disco.ai logo"
-                  width={48}
-                  height={48}
-                  className="h-12 w-12"
-                />
-                <span className="ml-2 text-2xl font-semibold text-gray-900">disco.ai</span>
-              </div>
+
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
                 Accelerate Your Sales
                 <span className="block text-blue-600">with AI-Driven Company Insights</span>

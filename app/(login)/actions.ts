@@ -51,7 +51,7 @@ const signInSchema = z.object({
 
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
-
+  console.log("signin")
   const userWithTeam = await db
     .select({
       user: users,
