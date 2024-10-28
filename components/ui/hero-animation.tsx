@@ -22,7 +22,7 @@ export default function HeroAnimation() {
 
     return (
         <div className="flex items-center justify-center w-full ">
-            <div className="flex sm:w-full sm:justify-between lg:flex-col lg:items-center lg:space-y-8 lg:space-x-0 ">
+            <div className="flex sm:w-full sm:justify-between l">
                 {steps.map((step, index) => (
                     <motion.div
                         key={index}

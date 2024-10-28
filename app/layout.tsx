@@ -35,25 +35,14 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
+      className={`bg-white dark:bg-gray-950 text-black dark:text-white  ${manrope.className}`}
     >
-      <body className="min-h-[100dvh] bg-gray-50">
+      <body className="min-h-[100dvh] min-w-[100dvw] max-w-[100dvw] overflow-x-hidden bg-gray-50">
 
         <UserProvider userPromise={Promise.resolve(initialUser)}>
           <PlanProvider planPromise={getUserPlan(initialUser?.id ?? 0)}>
             <Navbar />
-            <div className="absolute top-4 left-[50vw] z-50 translate-x-[-50%]">
-              <Link href="/" className="flex items-center">
-                <Image
-                  src={Icon}
-                  alt="disco.ai logo"
-                  width={24}
-                  height={24}
-                  className="h-6 w-6"
-                />
-                <span className="ml-2 text-xl font-semibold text-gray-900">disco.ai</span>
-              </Link>
-            </div>
+
 
             {children}
           </PlanProvider>
