@@ -150,7 +150,7 @@ export const products = pgTable('products', {
   tagline: text('tagline'),
   targetAudience: text('target_audience'),
   mainUseCase: text('main_use_case'),
-  keyFeatures: jsonb('key_features').notNull().default([]),  // Change this line
+  keyFeatures: jsonb('key_features').notNull().default([]),
   problemsSolved: text('problems_solved'),
   differentiators: text('differentiators'),
   successMetrics: text('success_metrics'),
@@ -158,4 +158,36 @@ export const products = pgTable('products', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   embeddings: vector('embeddings', { dimensions: 1536 }),
 });
+
+export const reports = pgTable('reports', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id),
+  productName: varchar('product_name', { length: 255 }).notNull(),
+  company: varchar('company', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const productsRelations = relations(products, ({ one }) => ({
+  user: one(users, {
+    fields: [products.userId],
+    references: [users.id],
+  }),
+}));
+
+export const reportsRelations = relations(reports, ({ one }) => ({
+  user: one(users, {
+    fields: [reports.userId],
+    references: [users.id],
+  }),
+  product: one(products, {
+    fields: [reports.productName],
+    references: [products.id],
+  }),
+}));
+
+export type Product = typeof products.$inferSelect;
+export type NewProduct = typeof products.$inferInsert;
+export type Report = typeof reports.$inferSelect;
+export type NewReport = typeof reports.$inferInsert;
 

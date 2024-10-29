@@ -3,7 +3,7 @@
 import { store } from '@/app/store';
 import { ActiveLink } from '@/components/dashboard/active-link';
 import { Button } from '@/components/ui/button';
-import { Users, Settings, Shield, Activity, Package, ChevronDown, Home, Menu, X } from 'lucide-react';
+import { Users, Settings, Shield, Activity, Package, ChevronDown, Home, Menu, X, DockIcon } from 'lucide-react';
 import { Provider } from 'react-redux';
 
 export default function DashboardLayout({
@@ -16,10 +16,12 @@ export default function DashboardLayout({
   const segment = params.segment?.[0] || '';
   const navItems = [
     { href: '/dashboard', icon: Home, label: 'Overview' },
-    { href: '/dashboard/products', icon: Package, label: 'Products' },
-    { href: '/dashboard/discovery', icon: Package, label: 'Discovery' },
-    { href: '/dashboard/processes', icon: Package, label: 'Processes' },
-    { href: '/dashboard/company-lists', icon: Package, label: 'Company Lists' },
+    { href: '/dashboard/products', icon: Package, label: 'Your Products' },
+    {
+      label: 'Reports',
+      href: '/dashboard/reports',
+      icon: DockIcon,
+    },
   ];
 
   const optionsItems = [
