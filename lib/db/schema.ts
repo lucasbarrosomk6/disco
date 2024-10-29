@@ -5,7 +5,8 @@ import {
   text,
   timestamp,
   integer,
-  jsonb
+  jsonb,
+  vector
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -155,5 +156,6 @@ export const products = pgTable('products', {
   successMetrics: text('success_metrics'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  embeddings: vector('embeddings', { dimensions: 1536 }),
 });
 

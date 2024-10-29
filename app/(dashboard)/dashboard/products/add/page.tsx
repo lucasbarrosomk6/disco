@@ -1,93 +1,171 @@
-'use client';
-
-import React, { useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+"use client"
+import { useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import FileUpload from '../components/FileUpload';
+import { Document } from 'langchain/document';
+import { Loader2 } from 'lucide-react';
+import ProductBio from '../components/ProductBio';
 import { useRouter } from 'next/navigation';
 
-import { Button } from '@/components/ui/button';
-import Step1 from '../components/Step1';
-import Step2 from '../components/Step2';
-import Step3 from '../components/Step3';
-import Step4 from '../components/Step4';
-import Step5 from '../components/Step5';
-import Step6 from '../components/Step6';
-import ProgressBar from '../components/ProgressBar';
-
-const productDetailsSchema = z.object({
-  productName: z.string().min(1, 'Product Name is required'),
-  tagline: z.string().optional(),
-  targetAudience: z.string().min(1, 'Target Audience is required'),
-  mainUseCase: z.string().min(1, 'Main Use Case is required'),
-  keyFeatures: z.array(z.string().min(1, 'Feature cannot be empty')).min(1, 'At least one key feature is required'),
-  problemsSolved: z.string().min(1, 'Please describe the problems your product solves'),
-  differentiators: z.string().optional(),
-  successMetrics: z.string().min(1, 'Please describe what success looks like for your customers'),
-});
-
-type ProductDetails = z.infer<typeof productDetailsSchema>;
-
-export default function AddProductPage() {
-  const [step, setStep] = useState(1);
+export default function Component() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [productBio, setProductBio] = useState<Record<string, string | string[]>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const router = useRouter();
-  const methods = useForm<ProductDetails>({
-    resolver: zodResolver(productDetailsSchema),
-    mode: 'onChange',
-  });
 
-  const onSubmit = async (data: ProductDetails) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
+  }, []);
+
+  const removeFile = (fileToRemove: File) => {
+    setFiles(files.filter((file) => file !== fileToRemove));
+  };
+
+  const handleUpload = async () => {
+    setIsLoading(true);
+    setIsGenerating(true);
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
     try {
-      const response = await fetch('/api/products/add', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      const response = await fetch('/api/documentLoader', {
+        method: 'POST',
+        body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to add product');
-      }
+      if (response.ok) {
+        const { documents }: { documents: Document[] } = await response.json();
+        console.log('Uploaded documents:', documents);
 
-      router.push('/dashboard/products');
+        // Send documents to the endpoint via POST request
+        const genBioResponse = await fetch('/api/dashboard/products/add/genProductBio', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(documents),
+        });
+
+        if (!genBioResponse.ok) {
+          console.error('Failed to generate product bio');
+          return;
+        }
+
+        const reader = genBioResponse.body!.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
+        let accumulatedText = '';
+
+        while (!done) {
+          const { value, done: doneReading } = await reader.read();
+          done = doneReading;
+          const chunkValue = decoder.decode(value, { stream: !done });
+          accumulatedText += chunkValue;
+
+          let lines = accumulatedText.split('\n');
+          accumulatedText = lines.pop() || '';
+
+          for (let line of lines) {
+            if (line.trim() === '') continue;
+            try {
+              const data = JSON.parse(line);
+              setProductBio((prevBio) => ({
+                ...prevBio,
+                [data.variable]: data.answer,
+              }));
+            } catch (error) {
+              console.error('Failed to parse line', line, error);
+            }
+          }
+        }
+      } else {
+        console.error('Upload failed');
+      }
     } catch (error) {
-      console.error('Error adding product:', error);
-      // Handle error (e.g., show error message to user)
+      console.error('Error uploading files:', error);
+    } finally {
+      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
 
-  const nextStep = () => setStep((prev) => Math.min(prev + 1, 6));
-  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+  const handleEdit = (variable: string, value: string | string[]) => {
+    setProductBio((prevBio) => ({
+      ...prevBio,
+      [variable]: value,
+    }));
+  };
+
+  const handleReset = () => {
+
+    setProductBio({});
+    setIsLoading(false);
+  };
+
+  const handleCreateProduct = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/dashboard/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productBio),
+      });
+
+      if (response.ok) {
+        const product = await response.json();
+        console.log('Product created:', product);
+        router.push('/dashboard/products');
+      } else {
+        console.error('Failed to create product');
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="max-w-2xl mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Add New Product</h1>
-        <ProgressBar currentStep={step} totalSteps={6} />
-        {step === 1 && <Step1 />}
-        {step === 2 && <Step2 />}
-        {step === 3 && <Step3 />}
-        {step === 4 && <Step4 />}
-        {step === 5 && <Step5 />}
-        {step === 6 && <Step6 />}
-        <div className="mt-4 flex justify-between">
-          {step > 1 && (
-            <Button type="button" onClick={prevStep} variant="outline">
-              Previous
-            </Button>
-          )}
-          {step < 6 ? (
-            <Button type="button" onClick={nextStep}>
-              Next
-            </Button>
-          ) : (
-            <Button type="submit">
-              Add Product
-            </Button>
-          )}
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-8">Add new product</h1>
+      {Object.keys(productBio).length === 0 && !isLoading ? (
+        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
+          <p className="text-lg text-gray-700 mb-6">
+            You already wrote so much about your company, no sense doing it again. Give us some relevant company docs and we'll get up to speed quick!
+          </p>
+          <FileUpload files={files} onDrop={onDrop} onRemove={removeFile} />
         </div>
-      </form>
-    </FormProvider>
+      ) : (
+        <ProductBio productBio={productBio} isGenerating={isGenerating} onEdit={handleEdit} />
+      )}
+      <div className="flex space-x-4">
+        {Object.keys(productBio).length > 0 && (
+          <Button variant="secondary" className="w-full" onClick={handleReset}>
+            Switch to File Upload
+          </Button>
+        )}
+        <Button
+          className="w-full"
+          onClick={Object.keys(productBio).length > 0 ? handleCreateProduct : handleUpload}
+          disabled={isLoading || (files.length === 0 && Object.keys(productBio).length === 0)}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </div>
+          ) : (
+            Object.keys(productBio).length > 0 ? 'Create Product' : 'Upload and Continue'
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
