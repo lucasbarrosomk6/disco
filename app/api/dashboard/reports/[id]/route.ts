@@ -59,6 +59,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             .set({
                 productName,
                 company,
+                sections: data.sections,
                 updatedAt: new Date(),
             })
             .where(and(eq(reports.id, reportId), eq(reports.userId, userId)))

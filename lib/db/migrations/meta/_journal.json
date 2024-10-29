@@ -15,6 +15,13 @@
       "when": 1730229372484,
       "tag": "0001_handy_lifeguard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1730238322955,
+      "tag": "0002_mixed_karen_page",
+      "breakpoints": true
     }
   ]
 }

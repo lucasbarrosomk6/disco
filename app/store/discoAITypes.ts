@@ -1,5 +1,5 @@
 export interface Process {
-    id: number
+    id?: number
     name: string
     searchPhrases: string[]
     questions: string[]

@@ -164,6 +164,7 @@ export const reports = pgTable('reports', {
   userId: integer('user_id').notNull().references(() => users.id),
   productName: varchar('product_name', { length: 255 }).notNull(),
   company: varchar('company', { length: 255 }).notNull(),
+  sections: jsonb('sections').$type<string[]>().notNull().default([]),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

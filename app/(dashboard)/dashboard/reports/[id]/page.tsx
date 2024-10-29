@@ -1,39 +1,69 @@
 "use client"
 
 import DashboardHeader from '@/components/dashboard/dashboard-header'
-import DashboardShell from '@/components/dashboard/dashboard-shell'
-import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton'
-import DynamicGridPage from '@/components/dashboard/dynamic-grid-page'
+import { ReportContent } from '@/components/dashboard/report-content'
+
+import { Loading } from '@/components/ui/loading'
 import { Report } from '@/lib/db/schema'
 import { useEffect, useState } from 'react'
 
 export default function ReportPage({ params }: { params: { id: string } }) {
-    const [report, setReport] = useState<Report | null>(null)
+    const reportId = parseInt(params.id);
+    const [report, setReport] = useState<Report | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!report?.company) {
-            const fetchReport = async () => {
-                const res = await fetch(`/api/dashboard/reports/${params.id}`)
-                const data = await res.json()
-                setReport(data)
+        async function fetchReport() {
+            try {
+                const response = await fetch(`/api/dashboard/reports/${reportId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch report');
+                }
+                const data = await response.json();
+                setReport(data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching report:', error);
+                setError('Failed to fetch report');
+                setLoading(false);
             }
-            fetchReport()
         }
-    }, [])
-    return (<DashboardShell>
 
-        {report ? (<>
+        fetchReport();
+    }, [reportId]);
+
+    if (loading) {
+        return (
+            <>
+                <DashboardHeader
+                    heading="Loading Report..."
+                    text="Please wait while we fetch the report details."
+                />
+                <Loading />
+            </>
+        );
+    }
+
+    if (error || !report) {
+        return (
+            <>
+                <DashboardHeader
+                    heading="Error Loading Report"
+                    text={error || "Report not found"}
+                />
+                <p className="text-center text-red-600">{error}</p>
+            </>
+        );
+    }
+
+    return (
+        <>
             <DashboardHeader
-                heading={report.company + " - " + report.productName}
-                text="Here are the results of the discovery process for this company."
+                heading={`${report.company} - ${report.productName}`}
+                text="View your report details below"
             />
-
-            <DynamicGridPage report={report} />
+            <ReportContent report={report} />
         </>
-        ) : (
-            <p>Ooops, something went wrong</p>
-        )}
-
-    </DashboardShell>)
-
+    );
 }
