@@ -6,10 +6,11 @@ import { Document } from 'langchain/document';
 import { Loader2 } from 'lucide-react';
 import ProductBio from '../components/ProductBio';
 import { useRouter } from 'next/navigation';
+import { Product } from '@/types/product';
 
 export default function Component() {
   const [files, setFiles] = useState<File[]>([]);
-  const [productBio, setProductBio] = useState<Record<string, string | string[]>>({});
+  const [productBio, setProductBio] = useState<Partial<Product>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const router = useRouter();
@@ -93,7 +94,7 @@ export default function Component() {
     }
   };
 
-  const handleEdit = (variable: string, value: string | string[]) => {
+  const handleEdit = (variable: keyof Product, value: string | string[]) => {
     setProductBio((prevBio) => ({
       ...prevBio,
       [variable]: value,

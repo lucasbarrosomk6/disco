@@ -3,11 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Product } from '@/types/product';
 
 interface ProductBioProps {
-    productBio: Record<string, string | string[]>;
+    productBio: Partial<Product>;
     isGenerating: boolean;
-    onEdit: (variable: string, value: string | string[]) => void;
+    onEdit: (variable: keyof Product, value: string | string[]) => void;
 }
 
 const formatTitle = (title: string) => {
@@ -25,24 +26,24 @@ export default function ProductBio({ productBio, isGenerating, onEdit }: Product
         }
     }, [editingIndex]);
 
-    const handleEdit = (variable: string, index: number = -1) => {
+    const handleEdit = (variable: keyof Product, index: number = -1) => {
         setEditingVariable(variable);
         setEditingIndex(index);
     };
 
-    const handleSave = (variable: string, value: string, index: number = -1) => {
+    const handleSave = (variable: keyof Product, value: string, index: number = -1) => {
         if (index === -1) {
             onEdit(variable, value);
         } else {
-            const updatedFeatures = [...(productBio[variable] as string[])];
+            const updatedFeatures = [...(productBio.keyFeatures || [])];
             updatedFeatures[index] = value;
-            onEdit(variable, updatedFeatures);
+            onEdit('keyFeatures', updatedFeatures);
         }
         setEditingVariable('');
         setEditingIndex(-1);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, variable: string, index: number = -1) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, variable: keyof Product, index: number = -1) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSave(variable, e.currentTarget.value, index);
@@ -69,7 +70,7 @@ export default function ProductBio({ productBio, isGenerating, onEdit }: Product
                             <h3 className="text-lg font-semibold mb-2 capitalize">{formatTitle(variable)}</h3>
                             {Array.isArray(answer) ? null : <button
                                 className="text-gray-500 hover:text-gray-700"
-                                onClick={() => handleEdit(variable)}
+                                onClick={() => handleEdit(variable as keyof Product)}
                             >
                                 <Edit2 className="h-4 w-4" />
                             </button>}
@@ -79,8 +80,8 @@ export default function ProductBio({ productBio, isGenerating, onEdit }: Product
                                 <Textarea
                                     defaultValue={answer as string}
                                     value={answer as string}
-                                    onChange={(e) => onEdit(variable, e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(e, variable)}
+                                    onChange={(e) => onEdit(variable as keyof Product, e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(e, variable as keyof Product)}
                                     className="border border-gray-300 rounded px-2 py-1 w-full"
                                 />
                             </div>
@@ -91,12 +92,12 @@ export default function ProductBio({ productBio, isGenerating, onEdit }: Product
                                         {editingVariable === variable && editingIndex === index ? (
                                             <Textarea
                                                 value={item}
-                                                onChange={(e) => onEdit(variable, [
+                                                onChange={(e) => onEdit(variable as keyof Product, [
                                                     ...answer.slice(0, index),
                                                     e.target.value,
                                                     ...answer.slice(index + 1),
                                                 ])}
-                                                onKeyDown={(e) => handleKeyDown(e, variable, index)}
+                                                onKeyDown={(e) => handleKeyDown(e, variable as keyof Product, index)}
                                                 className="border border-gray-300 rounded px-2 py-1 w-full"
                                             />
                                         ) : (
@@ -104,7 +105,7 @@ export default function ProductBio({ productBio, isGenerating, onEdit }: Product
                                                 <span>{item}</span>
                                                 <button
                                                     className="text-gray-500 hover:text-gray-700 ml-2"
-                                                    onClick={() => handleEdit(variable, index)}
+                                                    onClick={() => handleEdit(variable as keyof Product, index)}
                                                 >
                                                     <Edit2 className="h-4 w-4" />
                                                 </button>
@@ -114,7 +115,7 @@ export default function ProductBio({ productBio, isGenerating, onEdit }: Product
                                 ))}
                             </ul>
                         ) : (
-                            <p>{answer}</p>
+                            <p>{answer?.toString()}</p>
                         )}
                     </motion.div>
                 ))}

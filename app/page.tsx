@@ -1,8 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Search, Target, Zap, BarChart, Upload, SearchCheckIcon, SearchIcon, BarChart2 } from 'lucide-react';
-import { Terminal } from './(dashboard)/terminal';
-import Image from 'next/image';
-import Icon from '@/app/icon.svg';
+import { ArrowRight } from 'lucide-react';
 import HeroAnimation from '@/components/ui/hero-animation';
 import FeatureGrid from '@/components/ui/feature-grid';
 

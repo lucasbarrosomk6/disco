@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       tagline,
       targetAudience,
       mainUseCase,
-      keyFeatures: JSON.stringify(keyFeatures),
+      keyFeatures,
       problemsSolved,
       differentiators,
       successMetrics,

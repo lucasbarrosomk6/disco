@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loading } from '@/components/ui/loading';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,29 +10,32 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChevronDown, ChevronUp, Target, Zap, Shield, TrendingUp, CheckCircle2, Edit2, Plus, Trash2, Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Product } from '@/types/product';
 
 // Utility function to split text by newline and wrap each paragraph in a <p> tag
 function formatText(text: string) {
-  return text.split('\n').map((paragraph, index) => (
+  return text?.split('\n').map((paragraph, index) => (
     <p key={index} className="mb-4">{paragraph}</p>
   ));
 }
 
-interface ProductDetails {
-  id: number;
-  productName: string;
-  tagline?: string;
-  targetAudience: string;
-  mainUseCase: string;
-  keyFeatures: string[];
-  problemsSolved: string;
-  differentiators?: string;
-  successMetrics: string;
+async function getProduct(productId: number): Promise<Product | null> {
+  try {
+    const response = await fetch(`/api/dashboard/products/${productId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch product');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
 }
 
-export default function ProductInformationPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [product, setProduct] = useState<ProductDetails | null>(null);
+export default function ProductPage({ params }: { params: { id: string } }) {
+  const productId = parseInt(params.id);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState({
@@ -52,7 +55,16 @@ export default function ProductInformationPage({ params }: { params: { id: strin
     successMetrics: false,
   });
   const [editingFeatures, setEditingFeatures] = useState<number[]>([]);
-  const [editedProduct, setEditedProduct] = useState<ProductDetails | null>(null);
+
+  useEffect(() => {
+    async function fetchProduct() {
+      const fetchedProduct = await getProduct(productId);
+      setProduct(fetchedProduct);
+      setLoading(false);
+    }
+
+    fetchProduct();
+  }, [productId]);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
@@ -63,63 +75,43 @@ export default function ProductInformationPage({ params }: { params: { id: strin
   }
 
   const toggleFeatureEdit = (index: number) => {
-    setEditingFeatures((prev) => 
+    setEditingFeatures((prev) =>
       prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
     );
   }
 
-  useEffect(() => {
-    async function fetchProduct() {
-      try {
-        const response = await fetch(`/api/dashboard/products/${params.id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch product');
-        }
-        const data = await response.json();
-        setProduct(data);
-        setEditedProduct(data);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        setError('Failed to load product. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProduct();
-  }, [params.id]);
-
-  const handleInputChange = (field: keyof ProductDetails, value: string | string[]) => {
-    if (editedProduct) {
-      setEditedProduct({ ...editedProduct, [field]: value });
+  const handleInputChange = (field: keyof Product, value: string | string[]) => {
+    if (product) {
+      setProduct({ ...product, [field]: value });
     }
   };
 
   const handleFeatureChange = (index: number, value: string) => {
-    if (editedProduct) {
-      const newFeatures = [...editedProduct.keyFeatures];
+    if (product) {
+      const newFeatures = [...product.keyFeatures];
       newFeatures[index] = value;
-      setEditedProduct({ ...editedProduct, keyFeatures: newFeatures });
+      setProduct({ ...product, keyFeatures: newFeatures });
     }
   };
 
   const handleAddFeature = () => {
-    if (editedProduct) {
-      const newFeatures = [...editedProduct.keyFeatures, ''];
-      setEditedProduct({ ...editedProduct, keyFeatures: newFeatures });
-      setEditingFeatures((prev) => [...prev, editedProduct.keyFeatures.length]);
+    if (product) {
+      const newFeatures = [...product.keyFeatures, ''];
+      setProduct({ ...product, keyFeatures: newFeatures });
+      setEditingFeatures((prev) => [...prev, product.keyFeatures.length]);
     }
   };
 
   const handleRemoveFeature = (index: number) => {
-    if (editedProduct) {
-      const newFeatures = editedProduct.keyFeatures.filter((_, i) => i !== index);
-      setEditedProduct({ ...editedProduct, keyFeatures: newFeatures });
+    if (product) {
+      const newFeatures = product.keyFeatures.filter((_, i) => i !== index);
+      setProduct({ ...product, keyFeatures: newFeatures });
       setEditingFeatures((prev) => prev.filter(i => i !== index));
     }
   };
 
-  const handleSave = async (field: keyof ProductDetails) => {
-    if (!editedProduct) return;
+  const handleSave = async (field: keyof Product) => {
+    if (!product) return;
 
     try {
       const response = await fetch(`/api/dashboard/products/${params.id}`, {
@@ -127,13 +119,12 @@ export default function ProductInformationPage({ params }: { params: { id: strin
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ [field]: editedProduct[field] }),
+        body: JSON.stringify({ [field]: product[field] }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to update product');
       }
-      setProduct(editedProduct);
       if (field !== 'keyFeatures') {
         toggleEdit(field as keyof typeof editingSections);
       } else {
@@ -141,7 +132,6 @@ export default function ProductInformationPage({ params }: { params: { id: strin
       }
     } catch (error) {
       console.error('Error updating product:', error);
-      setError('Failed to update product. Please try again.');
     }
   };
 
@@ -153,7 +143,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
     return <p className="text-center text-red-600">{error}</p>;
   }
 
-  if (!product || !editedProduct) {
+  if (!product) {
     return <p className="text-center text-red-600">Product not found.</p>;
   }
 
@@ -162,7 +152,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
       <div className="text-center space-y-2 relative">
         {editingSections.productName ? (
           <Input
-            value={editedProduct.productName}
+            value={product.productName}
             onChange={(e) => handleInputChange('productName', e.target.value)}
             onBlur={() => handleSave('productName')}
             className="text-4xl font-bold text-primary px-12"
@@ -180,7 +170,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
         </Button>
         {editingSections.tagline ? (
           <Input
-            value={editedProduct.tagline || ''}
+            value={product.tagline || ''}
             onChange={(e) => handleInputChange('tagline', e.target.value)}
             onBlur={() => handleSave('tagline')}
             className="text-xl text-muted-foreground"
@@ -225,7 +215,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
             <CardContent>
               {editingSections.targetAudience ? (
                 <Textarea
-                  value={editedProduct.targetAudience}
+                  value={product.targetAudience}
                   onChange={(e) => handleInputChange('targetAudience', e.target.value)}
                   onBlur={() => handleSave('targetAudience')}
                 />
@@ -272,7 +262,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
             <CardContent>
               {editingSections.mainUseCase ? (
                 <Textarea
-                  value={editedProduct.mainUseCase}
+                  value={product.mainUseCase}
                   onChange={(e) => handleInputChange('mainUseCase', e.target.value)}
                   onBlur={() => handleSave('mainUseCase')}
                 />
@@ -331,7 +321,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
             <CardContent>
               <ScrollArea className=" w-full pr-4">
                 <ul className="space-y-4">
-                  {editedProduct.keyFeatures.map((feature, index) => (
+                  {product.keyFeatures.map((feature, index) => (
                     <li key={index} className="border-b pb-4 last:border-b-0">
                       {editingFeatures.includes(index) ? (
                         <Textarea
@@ -386,7 +376,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
             <CardContent>
               {editingSections.problemsSolved ? (
                 <Textarea
-                  value={editedProduct.problemsSolved}
+                  value={product.problemsSolved}
                   onChange={(e) => handleInputChange('problemsSolved', e.target.value)}
                   onBlur={() => handleSave('problemsSolved')}
                 />
@@ -424,7 +414,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
                   <Button
                     variant="ghost"
                     size="icon"
-                    
+
                     className="ml-auto"
                     onClick={() => toggleEdit('differentiators')}
                   >
@@ -435,7 +425,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
               <CardContent>
                 {editingSections.differentiators ? (
                   <Textarea
-                    value={editedProduct.differentiators || ''}
+                    value={product.differentiators || ''}
                     onChange={(e) => handleInputChange('differentiators', e.target.value)}
                     onBlur={() => handleSave('differentiators')}
                   />
@@ -483,7 +473,7 @@ export default function ProductInformationPage({ params }: { params: { id: strin
             <CardContent>
               {editingSections.successMetrics ? (
                 <Textarea
-                  value={editedProduct.successMetrics}
+                  value={product.successMetrics}
                   onChange={(e) => handleInputChange('successMetrics', e.target.value)}
                   onBlur={() => handleSave('successMetrics')}
                 />
