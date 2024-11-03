@@ -12,14 +12,14 @@ export const createEmbeddingsLangchain = async (
   });
   const splitDocs: Document<Record<string, any>>[] = [];
   let sourceId = 0;
-  for (const [key, value] of textsMap.entries()) { 
+  for (const [key, value] of textsMap.entries()) {
     for (const source of value) {
       sourceId++;
       const splitTextArray = await splitter.splitText(source.text);
       for (const splitText of splitTextArray) {
         splitDocs.push(
           new Document({
-            pageContent: splitText,
+            pageContent: "search_document: " + splitText,
             metadata: { url: source.url, title: source.title, id: sourceId },
           })
         );

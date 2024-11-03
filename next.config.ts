@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config: { resolve: { fallback: any; }; }, { isServer }: any) => {
+  productionBrowserSourceMaps: true,
+  webpack: (config: { resolve: { fallback: any; }, devtool: string; }, { isServer, dev }: any) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -12,6 +13,9 @@ const nextConfig = {
         perf_hooks: false,
         stream: false,
       };
+      if (dev) {
+        config.devtool = 'source-map'
+      }
     }
     return config;
   },

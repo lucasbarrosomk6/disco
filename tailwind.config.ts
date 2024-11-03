@@ -55,6 +55,25 @@ const config: Config = {
           '5': 'hsl(var(--chart-5))',
         },
       },
+      // animation: {
+      //   'spin-pulse': 'spin-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      // },
+      // keyframes: {
+      //   'spin-pulse': {
+      //     '0%': {
+      //       transform: 'rotate(0deg) scale(1)',
+      //       opacity: '1'
+      //     },
+      //     '50%': {
+      //       transform: 'rotate(180deg) scale(1.1)',
+      //       opacity: '0.8'
+      //     },
+      //     '100%': {
+      //       transform: 'rotate(360deg) scale(1)',
+      //       opacity: '1'
+      //     }
+      //   },
+      // },
     },
   },
   plugins: [

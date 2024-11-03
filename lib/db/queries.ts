@@ -6,13 +6,13 @@ import { verifyToken } from '@/lib/auth/session';
 import { PlanInfo } from '@/lib/plan';
 
 export async function getUser() {
-  const sessionCookie = cookies().get('session');
+  const sessionCookie = (await cookies()).get('session');
   if (!sessionCookie || !sessionCookie.value) {
     return null;
   }
 
   const sessionData = await verifyToken(sessionCookie.value);
- 
+
   if (
     !sessionData ||
     !sessionData.user ||

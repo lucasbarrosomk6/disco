@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         for (const question of questions) {
             const needsToBeAnArray = question.variable === "keyFeatures";
             const context = (
-                await embeddings.similaritySearchWithScore(question.question, 2)
+                await embeddings.similaritySearchWithScore("search_query: " + question.question, 2)
             ).filter((doc) => doc[1] > 0.5);
 
             const contextForPrompt = context

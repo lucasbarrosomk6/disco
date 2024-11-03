@@ -2,36 +2,41 @@
 
 import DashboardHeader from '@/components/dashboard/dashboard-header'
 import { ReportContent } from '@/components/dashboard/report-content'
-
 import { Loading } from '@/components/ui/loading'
 import { Report } from '@/lib/db/schema'
 import { useEffect, useState } from 'react'
+import { use } from 'react'
 
-export default function ReportPage({ params }: { params: { id: string } }) {
-    const reportId = parseInt(params.id);
-    const [report, setReport] = useState<Report | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+interface PageProps {
+    params: Promise<{ id: string }>
+}
+
+export default function ReportPage({ params }: PageProps) {
+    const resolvedParams = use(params)
+    const reportId = parseInt(resolvedParams.id)
+    const [report, setReport] = useState<Report | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         async function fetchReport() {
             try {
-                const response = await fetch(`/api/dashboard/reports/${reportId}`);
+                const response = await fetch(`/api/dashboard/reports/${reportId}`)
                 if (!response.ok) {
-                    throw new Error('Failed to fetch report');
+                    throw new Error('Failed to fetch report')
                 }
-                const data = await response.json();
-                setReport(data);
-                setLoading(false);
+                const data = await response.json()
+                setReport(data)
+                setLoading(false)
             } catch (error) {
-                console.error('Error fetching report:', error);
-                setError('Failed to fetch report');
-                setLoading(false);
+                console.error('Error fetching report:', error)
+                setError('Failed to fetch report')
+                setLoading(false)
             }
         }
 
-        fetchReport();
-    }, [reportId]);
+        fetchReport()
+    }, [reportId])
 
     if (loading) {
         return (
@@ -42,7 +47,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
                 />
                 <Loading />
             </>
-        );
+        )
     }
 
     if (error || !report) {
@@ -54,8 +59,10 @@ export default function ReportPage({ params }: { params: { id: string } }) {
                 />
                 <p className="text-center text-red-600">{error}</p>
             </>
-        );
+        )
     }
+
+
 
     return (
         <>
@@ -65,5 +72,5 @@ export default function ReportPage({ params }: { params: { id: string } }) {
             />
             <ReportContent report={report} />
         </>
-    );
+    )
 }

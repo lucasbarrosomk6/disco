@@ -3,26 +3,27 @@ import { db } from '@/lib/db/drizzle';
 import { reports } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { getUser } from '@/lib/db/queries';
-
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await getUser();
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const reportId = parseInt(params.id);
+        const resolvedParams = await params;
+        const reportId = parseInt(resolvedParams.id);
         if (isNaN(reportId)) {
             return NextResponse.json({ error: 'Invalid report ID' }, { status: 400 });
         }
 
         const [report] = await db.select().from(reports).where(eq(reports.id, reportId));
-        if (report.userId !== user.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
 
         if (!report) {
             return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+        }
+
+        if (report.userId !== user.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const response = NextResponse.json(report);
@@ -42,7 +43,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const data = await request.json();
-    const { productName, company } = data;
+    const { productName, company, sections } = data;
 
     try {
         const userId = user.id;
@@ -57,9 +58,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         const [updatedReport] = await db.update(reports)
             .set({
-                productName,
-                company,
-                sections: data.sections,
+                sections, company, productName,
                 updatedAt: new Date(),
             })
             .where(and(eq(reports.id, reportId), eq(reports.userId, userId)))
