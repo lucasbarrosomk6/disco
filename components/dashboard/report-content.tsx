@@ -100,6 +100,8 @@ export function ReportContent({ report }: ReportContentProps) {
             };
 
             const processEventData = (eventType: string, data: string) => {
+                console.log("eventType", eventType)
+
                 switch (eventType) {
                     case 'status':
                         if (data) {
@@ -107,15 +109,32 @@ export function ReportContent({ report }: ReportContentProps) {
                         }
                         break;
 
+                    case 'report':
+                        if (data) {
+                            try {
+                                console.log("report data", data)
+                                const reportData = JSON.parse(data);
+                                // Validate that reportData.sections is an array
+                                if (Array.isArray(reportData.sections)) {
+                                    // Update sections with the full report data
+                                    sectionsAccumulator.push(...reportData.sections);
+                                    setSections(reportData.sections);
+                                } else {
+                                    console.error('reportData.sections is not an array:', reportData.sections);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing report data:', e);
+                            }
+                        }
+                        break;
+
                     case 'section':
                         if (data) {
                             try {
                                 const section = JSON.parse(data);
-                                // Ensure we're not nesting arrays
                                 const sectionToAdd = Array.isArray(section) ? section[0] : section;
                                 sectionsAccumulator.push(sectionToAdd);
                                 setSections(sections => {
-                                    // Ensure we're adding the object, not an array
                                     const newSection = Array.isArray(section) ? section[0] : section;
                                     return [...sections, newSection];
                                 });

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processCompany, processSections } from '@/app/api/runProcess/processCompany';
+import { processSearchPhrasesPrompt } from '@/prompts/brainstorm/processSearchPhrases';
+import { processQuestionsPrompt } from '@/prompts/brainstorm/processQuestions';
 
 export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -23,32 +25,19 @@ export async function POST(req: NextRequest) {
             // '"${companyName}" shopper motivations and pain points',
             // 'Retail customer persona examples for big box stores like "${companyName}"',
         ],
-        questions: ['Who are the primary customers of "${companyName}", and what are their main characteristics?',
-            // 'How does "${companyName}" differentiate itself from its main competitors in the market?',
-            // 'What is the current business model of "${companyName}", and how has it evolved over recent years?',
-            // 'What are the latest financial performance metrics of "${companyName}", including revenue, profit margins, and market share?',
-            // 'What are some significant recent developments or news about "${companyName}"?',
-            // 'Which top companies are utilizing "${companyName}"s services?',
-
-            // 'What are the primary demographics of "${companyName}" customers (age, income, location)?',
-            // 'What are the shopping habits and frequency of "${companyName}" customers?',
-            // 'What challenges or pain points do "${companyName}" customers experience in retail?',
-            // 'What motivates "${companyName}" customers to choose "${companyName}" over other retailers?',
-            // 'How do "${companyName}" customers prefer to engage with the store (in-person, online, mobile app)?',
-        ],
+        questions: ['Who are the primary customers of "${companyName}", and what are their main characteristics?',],
         sections: [
             {
+                id: 0,
                 title: "Company Overview",
                 prompt: "Provide a comprehensive overview of ${companyName}, including its primary customers, business model, and recent developments."
             },
             {
+                id: 1,
                 title: "Market Position",
                 prompt: "Analyze ${companyName}'s market position, including how it differentiates itself from competitors and its financial performance."
             },
-            // {
-            //     title: "Customer Analysis",
-            //     prompt: "Describe ${companyName}'s target audience, their demographics, shopping habits, and preferences."
-            // }
+
         ]
     }
 
@@ -63,16 +52,16 @@ export async function POST(req: NextRequest) {
                 controller.enqueue('event: status\ndata: Conducting initial research...\n\n');
                 const { sections, questionResponses } = await processCompany(companyName, process, updateStatus);
 
-                controller.enqueue(`event: section\ndata: ${JSON.stringify(sections)}\n\n`);
-                // controller.enqueue('event: status\ndata: Generating report sections...z\n\n');
-                // if (sectionIndex !== undefined) {
-                //     const sectionContent = await processSections([process.sections[sectionIndex]], questionResponses, updateStatus);
-                //     controller.enqueue(`event: section\ndata: ${JSON.stringify(sectionContent)}\n\n`);
-                // } else {
-                //     for (const section of sections) {
-                //         controller.enqueue(`event: section\ndata: ${JSON.stringify(section)}\n\n`);
-                //     }
-                // }
+
+                // Send the full report
+                const report = {
+                    companyName,
+                    processName: process.name,
+                    sections,
+                    questionResponses
+                };
+                controller.enqueue(`event: report\ndata: ${JSON.stringify(report)}\n\n`);
+
 
                 controller.enqueue('event: complete\ndata: Report generation completed.\n\n');
             } catch (error) {

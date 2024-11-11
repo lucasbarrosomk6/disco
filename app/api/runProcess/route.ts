@@ -2,34 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Process, CompanyList, Source } from '@/app/store/discoAITypes';
 import { processCompany } from './processCompany';
 
-async function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export async function POST(req: NextRequest) {
   const responseStream = new TransformStream();
   const writer = responseStream.writable.getWriter();
   const encoder = new TextEncoder();
+  const allResults: { sections: { title: string; content: string; sources: Source[] }[]; companyName: string; processName: string }[] = [];
 
   const sendUpdate = async (message: string) => {
     await writer.write(encoder.encode(`data: ${JSON.stringify({ message })}\n\n`));
   };
 
   const sendResult = async (result: { sections: { title: string; content: string; sources: Source[] }[]; companyName: string; processName: string }) => {
-    const formattedOutput = `# ${result.processName} for ${result.companyName}
+    const formattedOutput = `
+      # ${result.processName} for ${result.companyName}
 
-${result.sections.map(section => `
-## ${section.title}
+      ${result.sections.map(section => `
+      ## ${section.title}
 
-${section.content}
+      ${section.content}
 
-### Sources
+      ### Sources
 
-${section.sources.map((source) => `
-- [${source.title}](${source.url})
-  - ${source.explanation || 'No explanation provided'}
-`).join("\n")}
-`).join("\n")}`;
+      ${section.sources.map((source) => `
+      - [${source.title}](${source.url})
+        - ${source.explanation || 'No explanation provided'}
+      `).join("\n")}
+      `).join("\n")}`;
+
+    allResults.push(result);
 
     await writer.write(encoder.encode(`data: ${JSON.stringify({ result: { ...result, output: formattedOutput } })}\n\n`));
   };
@@ -51,7 +52,8 @@ ${section.sources.map((source) => `
           await sendUpdate(`Running process ${j + 1}/${processes.length}: ${process.name} for ${company}`);
 
           try {
-            const result = await processCompany(company, process);
+            const result = await processCompany(company, process, sendUpdate);
+
             await sendResult({
               sections: result.sections,
               companyName: company,
@@ -63,10 +65,12 @@ ${section.sources.map((source) => `
             await sendUpdate(`Error in process ${process.name} for ${company}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
 
-          // Add a small delay between processes to avoid overwhelming the system
-          await delay(500);
+
         }
       }
+
+      await sendUpdate('Preparing final report...');
+      await writer.write(encoder.encode(`data: ${JSON.stringify({ finalReport: allResults })}\n\n`));
 
       await sendUpdate('All processes completed successfully');
       await writer.close();

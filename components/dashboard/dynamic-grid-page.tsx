@@ -31,17 +31,17 @@ export function DynamicGridPage({ report, generatingReport, redoSection, status 
                 }
 
                 return (
-                    <Card key={index} className="relative">
+                    <Card key={index} className="relative max-w-3xl">
                         <Button
                             onClick={() => redoSection(index)}
                             disabled={generatingReport}
-
+                            variant="ghost"
                             className="absolute top-2 right-2"
                         >
                             {generatingReport ? <RefreshCw className="w-12 h-12 animate-spin" /> : <RefreshCw className="w-12 h-12" />}
                         </Button>
 
-                        <CardContent className="pt-6">
+                        <CardContent className="pt-0">
                             {generatingReport ? <div className="flex flex-col items-center justify-center space-y-4">
                                 <div className="flex items-center justify-center p-12 pb-1">
                                     <RefreshCw className="w-12 h-12 animate-spin-pulse" />
