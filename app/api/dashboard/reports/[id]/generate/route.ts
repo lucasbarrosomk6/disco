@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processCompany, processSections } from '@/app/api/runProcess/processCompany';
 import { processSearchPhrasesPrompt } from '@/prompts/brainstorm/processSearchPhrases';
 import { processQuestionsPrompt } from '@/prompts/brainstorm/processQuestions';
+import { Process } from '@/app/store/discoAITypes';
 
 export async function POST(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -9,33 +10,39 @@ export async function POST(req: NextRequest) {
     const { companyName, sectionIndex } = await req.json();
 
     // Hardcoded process for now
-    const process = {
+    const process: Process = {
         id: 0,
         name: "About the company",
-        searchPhrases: ['Comprehensive overview of "${companyName}"',
-            'Primary customer demographics of "${companyName}"',
-            'How "${companyName}" differentiates itself from competitors',
-            'Business model and evolution of "${companyName}"',
-            // 'Financial performance and metrics for "${companyName}"',
-            // 'Recent news and significant developments about "${companyName}"',
-            // 'Which top companies are utilizing "${companyName}"s services?',
-            // '"${companyName}" target audience demographics',
-            // '"${companyName}" customer behavior analysis',
-            // 'Creating a retail customer persona for "${companyName}"',
-            // '"${companyName}" shopper motivations and pain points',
-            // 'Retail customer persona examples for big box stores like "${companyName}"',
+        searchPhrases: ['${companyName} company overview history background',
+            '${companyName} target market customer demographics data',
+            '${companyName} competitive advantage unique selling proposition',
+            '${companyName} business model revenue strategy growth',
+            '${companyName} latest news updates developments 2024',
+
         ],
-        questions: ['Who are the primary customers of "${companyName}", and what are their main characteristics?',],
+
         sections: [
             {
                 id: 0,
                 title: "Company Overview",
-                prompt: "Provide a comprehensive overview of ${companyName}, including its primary customers, business model, and recent developments."
+                prompt: "Create a comprehensive overview of ${companyName} using the following structure:\n\n# Core Business\n- Main products/services\n- Target industries\n- Geographic presence\n\n# Customer Analysis\n| Segment | Description | Key Needs |\n|---------|-------------|------------|\n| Primary | [details] | [needs] |\n| Secondary | [details] | [needs] |\n\n# Revenue Model\n> Key revenue streams and business model overview\n\n## Pricing Strategy\n- Product/Service pricing\n- Subscription/Usage models\n\n# Recent Updates\n1. Latest developments\n2. Strategic initiatives\n3. Market expansions\n\n*Include specific metrics and data points where available*",
+                questions: [
+                    'What are ${companyName}\'s main products/services, target industries, and geographic presence?',
+                    'Who are ${companyName}\'s primary and secondary customer segments, and what are their key characteristics and needs?',
+                    'What are ${companyName}\'s key revenue streams, business model, and pricing strategies?',
+                    'What are ${companyName}\'s most recent developments, strategic initiatives and market expansions in the past year?'
+                ],
             },
             {
                 id: 1,
                 title: "Market Position",
-                prompt: "Analyze ${companyName}'s market position, including how it differentiates itself from competitors and its financial performance."
+                prompt: "Analyze ${companyName}'s market position using the following structure:\n\n# Market Overview\n- Industry size and growth\n- Key market trends\n- Competitive landscape\n\n# Competitive Analysis\n| Competitor | Market Share | Key Strengths | Key Weaknesses |\n|------------|--------------|---------------|----------------|\n| ${companyName} | [share %] | [strengths] | [weaknesses] |\n| Competitor 1 | [share %] | [strengths] | [weaknesses] |\n\n# Differentiation Strategy\n> Core competitive advantages and unique value proposition\n\n## Key Differentiators\n- Product/Service advantages\n- Technology/Innovation edge\n- Brand positioning\n\n# Financial Performance\n1. Revenue trends\n2. Profitability metrics\n3. Growth indicators\n\n*Include market data and financial metrics where available*",
+                questions: [
+                    'What is the current state of ${companyName}\'s market, including size, growth trends, and competitive landscape?',
+                    'How does ${companyName} compare to its main competitors in terms of market share, strengths, and weaknesses?',
+                    'What are ${companyName}\'s key differentiators and unique value propositions in the market?',
+                    'What are the key financial performance indicators and trends for ${companyName}?'
+                ],
             },
 
         ]
@@ -50,7 +57,7 @@ export async function POST(req: NextRequest) {
                 }
 
                 controller.enqueue('event: status\ndata: Conducting initial research...\n\n');
-                const { sections, questionResponses } = await processCompany(companyName, process, updateStatus);
+                const { sections } = await processCompany(companyName, process, updateStatus);
 
 
                 // Send the full report
@@ -58,7 +65,6 @@ export async function POST(req: NextRequest) {
                     companyName,
                     processName: process.name,
                     sections,
-                    questionResponses
                 };
                 controller.enqueue(`event: report\ndata: ${JSON.stringify(report)}\n\n`);
 

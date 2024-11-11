@@ -2,15 +2,15 @@ export interface Process {
     id?: number
     name: string
     searchPhrases: string[]
-    questions: string[]
-    sections: { title: string; prompt: string }[]
+    sections: Section[]
 }
 
 export interface Section {
+    id: number;
     title: string;
     content?: string;
     prompt: string;
-
+    questions: string[];
     sources?: Source[];
 }
 
